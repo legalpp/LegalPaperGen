@@ -345,6 +345,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
   <div class="gen-col">
     <button class="btn-gen" id="genBtn" onclick="generatePaper()" disabled>&#x2193; Download Paper</button>
     <button class="btn-gen btn-ans" id="ansBtn" onclick="generateAnswers()" disabled>&#x2713; Download Answers</button>
+    <a class="btn-gen btn-ans" id="sheetLink"
+       href="https://docs.google.com/spreadsheets/d/1k7HrdPu1pU7_AQ424DLp5XDJC1aa0FHMaAh0ZenDt5Q/edit?usp=sharing"
+       target="_blank" rel="noopener noreferrer"
+       style="text-decoration:none">&#x1F4CA; Open MCQ Answer Sheet</a>
     <div class="readiness">
       <div><span class="dot off" id="dMCQ"></span>MCQ (20 questions)</div>
       <div><span class="dot off" id="dSA"></span>Short Answer (15 marks)</div>
@@ -869,9 +873,7 @@ function generatePaper() {
   doc.text('Use the multiple-choice answer sheet for Questions 1-20.', ml, y); y += 5;
   sp(3); rule(); sp(4);
 
-  const allMCQ = [...mcqState.crime, ...mcqState.hr]
-    .map(i => MCQ_DATA[i])
-    .sort(() => Math.random() - 0.5);
+  const allMCQ = getPaperMCQOrder();
 
   allMCQ.forEach((q, n) => {
     // Estimate space needed for this question
@@ -1095,6 +1097,25 @@ function generatePaper() {
 // helper used in cover page section count
 function allMCQCount(){ return 20; }
 
+// ── SHARED MCQ ORDER ──────────────────────────────────────────────────────────
+// The paper and the answer key both call this, so question numbers always match.
+// The order is shuffled once per set of selected questions and then reused.
+let paperOrder = null, paperOrderSig = '';
+function getPaperMCQOrder() {
+  const ids = [...mcqState.crime, ...mcqState.hr];
+  const sig = ids.slice().sort((a,b)=>a-b).join(',');
+  if (!paperOrder || paperOrderSig !== sig) {
+    const a = ids.slice();
+    for (let i=a.length-1; i>0; i--) {
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    paperOrder = a;
+    paperOrderSig = sig;
+  }
+  return paperOrder.map(i => MCQ_DATA[i]);
+}
+
 
 
 // ── PDF: ANSWERS ──────────────────────────────────────────────────────────────
@@ -1123,20 +1144,18 @@ function generateAnswers() {
   t(`${title} – ${subj}`,{size:11,center:true,color:MU});sp(4);
   rule();sp(2);
 
-  const allMCQ=[...mcqState.crime,...mcqState.hr].map(i=>MCQ_DATA[i]);
-  const shuffled=allMCQ.sort(()=>Math.random()-.5);  // same shuffle order isn't tracked — print all
-  // Actually just list them in order with codes for reference
+  // Same order as the paper, so Q1 here is Q1 on the paper
+  const shuffled=getPaperMCQOrder();
   const cols=4, rowH=8, colW=cw/cols;
   shuffled.forEach((q,n)=>{
     const col=n%cols, row=Math.floor(n/cols);
-    if(col===0 && n>0) {}
     const x=ml+col*colW, yy=y+row*rowH;
     doc.setFontSize(10);doc.setFont('times','normal');doc.setTextColor(...INK);
     doc.text(`${n+1}.  ${q['Answer']}   [${q['Code']}]`,x,yy);
   });
   y+=Math.ceil(shuffled.length/cols)*rowH+8;
   rule();sp(4);
-  t('Note: Paper must be regenerated with the same selections to match question order.',{size:9,center:true,color:MU});
+  t('Question numbers match the paper generated from the same selections. Codes in [ ] match the Google Sheet.',{size:9,center:true,color:MU});
 
   const pg=doc.getNumberOfPages();
   for(let p=1;p<=pg;p++){
