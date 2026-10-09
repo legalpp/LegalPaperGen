@@ -1171,9 +1171,9 @@ function generateAnswers() {
 // Paste the "Publish to web" CSV link for each tab between the quotes.
 // Leave a link empty (or if it fails to load) and the built-in questions are used.
 const SHEET_URLS = {
-  mcq:     '',   // MCQ tab
-  sa:      '',   // Short Answer tab
-  essays:  ''    // Essays tab
+  mcq:     'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyGV9tpy56LGk7VrmcsVHWhe0C_QMPp0u-WTKGsV4NK3BUUrAn8XflQ9abjIh2mAQ3NJvdc80ruh5e/pub?gid=1416167024&single=true&output=csv',   // MCQ tab
+  sa:      'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyGV9tpy56LGk7VrmcsVHWhe0C_QMPp0u-WTKGsV4NK3BUUrAn8XflQ9abjIh2mAQ3NJvdc80ruh5e/pub?gid=1801602427&single=true&output=csv',   // Short Answer tab
+  essays:  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQyGV9tpy56LGk7VrmcsVHWhe0C_QMPp0u-WTKGsV4NK3BUUrAn8XflQ9abjIh2mAQ3NJvdc80ruh5e/pubhtml?gid=242696465&single=true'    // Essays tab
 };
 
 function parseCSV(text) {
